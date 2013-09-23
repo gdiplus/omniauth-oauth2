@@ -72,8 +72,12 @@ module OmniAuth
           raise CallbackError.new(nil, :csrf_detected)
         end
 
-        self.access_token = build_access_token
-        self.access_token = access_token.refresh! if access_token.expired?
+        if request.params['access_token']
+          self.access_token =  ::OAuth2::AccessToken.from_hash(client, request.params)
+        else
+          self.access_token = build_access_token
+          self.access_token = access_token.refresh! if access_token.expired?
+        end
 
         super
       rescue ::OAuth2::Error, CallbackError => e
